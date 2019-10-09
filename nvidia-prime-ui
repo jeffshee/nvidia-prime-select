@@ -71,7 +71,7 @@ edit_options(){
 	--text="$vb\\Edit nvidia-prime-select and GUI options.$end")
 	if [ $? = 0 ]; then
 		pkexec bash -c "echo -e \"$edit_options_conf\" > $opt_conf"
-		notify-send -t 5000 -u low  "Options data saved."
+		notify-send -t 5000 -u low  "Options configuration saved"
 	fi
 	bash -c nvidia-prime-ui
 	exit 0
@@ -83,7 +83,7 @@ edit_conf(){
 	if [ $? = 0 ]; then
 		if [ $(printf "$edit_lib_conf"| sed -En "s/^(.*)='(.*)'$/\2/g;p"| grep -c .) -gt 0 ]; then
 			pkexec bash -c "echo -e \"$edit_lib_conf\" > $lib_conf"
-			notify-send -t 5000 -u low  "libraries data saved."
+			notify-send -t 5000 -u low  "Libraries configuration saved"
 		fi
 	fi
 	bash -c nvidia-prime-ui
@@ -102,7 +102,7 @@ edit_xorg(){
 	if [ $? = 0 ]; then
 		_xorg_conf=$(echo -e "$edit_xorg_conf"| sed -En 's|\"|\\"|g;p')
 		pkexec bash -c "echo -e \"$_xorg_conf\" > $xorg_file"
-		notify-send -t 5000 -u low  "Xorg conf file saved."
+		notify-send -t 5000 -u low  "Xorg configuration saved"
 	fi
 	bash -c nvidia-prime-ui
 	exit 0
@@ -117,7 +117,7 @@ setup_prime(){
 	--cancel-label='Cancel' --ok-label='Confirm'
 	if [ $? = 0 ]; then
 		pkexec /usr/sbin/nvidia-prime-select $_pset
-		notif_msg=$(printf "Prime is set to %s.\nPlease restart the session." "$_pset")
+		notif_msg=$(printf "Prime is set to %s" "$_pset")
 	else
 		bash -c nvidia-prime-ui
 		exit 0
@@ -178,6 +178,6 @@ case $menu_prime in
 esac
 setup_prime
 if [[ $notif_msg != '' ]]; then
-	notify-send -t 5000 -u low --icon=nvidia-prime "Nvidia-prime setup applied." "$notif_msg."
+	notify-send -t 5000 -u low --icon=nvidia-prime "$notif_msg" "Please restart the session to take effect"
 fi
 exit 0

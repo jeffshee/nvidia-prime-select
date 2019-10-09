@@ -166,7 +166,7 @@ fi
 menu_prime=$(zenity --width=500 --height=400 --list --radiolist --hide-header \
 --title="nvidia-prime-select" --text "$vb$prime_msg$end" \
 --column "1" --column "2" --column "3" --separator=";" --hide-column=2 \
-"${setup_list[@]}" --ok-label="Next")
+"${setup_list[@]}" --ok-label="Next" --window-icon="/usr/share/pixmaps/nvidia-prime.png")
 if [ $? = 1 ]; then exit 0; fi
 case $menu_prime in
 	"1") _pset="intel"; _prime="$m_prime_01" ;;

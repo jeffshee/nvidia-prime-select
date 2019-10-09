@@ -44,19 +44,21 @@ j='<span color=\"#FF6800\">'
 rBB='<span color=\"#FF3300\" font=\"20\">'
 ## prime_setup
 # first ui msg.
-prime_msg_01="Select the Prime setup you would like to use:"
-prime_msg_02="Default is currently set to $j%s$end."
-menu_prime_01="Set Prime to Intel device"
-menu_prime_02="Set Prime to Nvidia device"
-menu_prime_03="Edit Libraries config file"
-menu_prime_04="Edit current Xorg config file"
-menu_prime_05="Edit options config file"
+prime_msg_01="What do you want to do?"
+prime_msg_02="Prime is currently set to $j%s$end."
+menu_prime_01="Set Prime to Intel"
+menu_prime_02="Set Prime to Nvidia"
+menu_prime_03="Set Prime to Default"
+menu_prime_04="Edit libraries config file"
+menu_prime_05="Edit current Xorg config file"
+menu_prime_06="Edit options config file"
 # ref
 m_prime_01="intel"
 m_prime_02="nvidia"
+m_prime_03="default"
 # last wrn msg
 wrn_prime_01="Prime will be set to $j%s$end."
-wrn_prime_02="\nYou may now restart the user session to take effect."
+wrn_prime_02="\nTo take effect, you need to restart the session."
 # nvidia-prime-select path and files
 xorg_prime=/etc/nvidia-prime
 lib_conf=/etc/nvidia-prime/library.conf
@@ -112,10 +114,10 @@ setup_prime(){
 	xrandr_msg="$vb\n\nCheck your display settings before restart.$end"
 	zenity --height=100 --title="nvidia-prime-select setup" --question --no-wrap \
 	--icon-name=nvidia-prime --text="$vb$(printf "$wrn_prime_01$wrn_prime_02" "$_prime")$prev_conf$xrandr_msg$end" \
-	--cancel-label='Cancel' --ok-label='Setup'
+	--cancel-label='Cancel' --ok-label='Confirm'
 	if [ $? = 0 ]; then
 		pkexec /usr/sbin/nvidia-prime-select $_pset
-		notif_msg=$(printf "Session will restart with %s hardware.\nPlease restart your session." "$_pset")
+		notif_msg=$(printf "Prime is set to %s.\nPlease restart the session." "$_pset")
 	else
 		bash -c nvidia-prime-ui
 		exit 0
@@ -134,9 +136,10 @@ unset setup_list setup_option _pset
 setup_option=(
 "$menu_prime_01;$m_prime_01"
 "$menu_prime_02;$m_prime_02"
-"$menu_prime_03;"
+"$menu_prime_03;$m_prime_03"
 "$menu_prime_04;"
 "$menu_prime_05;"
+"$menu_prime_06;"
 )
 n=1
 for p_set in "${setup_option[@]}"; do
@@ -155,22 +158,23 @@ for p_set in "${setup_option[@]}"; do
 done
 
 if [[ "$current_set" ]]; then
-	prime_msg="$prime_msg_01\n$(printf "$prime_msg_02" "$current_set")"
+	prime_msg="$(printf "$prime_msg_02" "$current_set")\n$prime_msg_01"
 else
-	prime_msg="$prime_msg_01\nNo device is currently set."
+	prime_msg="No device is currently set.\n$prime_msg_01"
 fi
 
-menu_prime=$(zenity --width=340 --list --radiolist --hide-header \
+menu_prime=$(zenity --width=500 --height=400 --list --radiolist --hide-header \
 --title="nvidia-prime-select" --text "$vb$prime_msg$end" \
 --column "1" --column "2" --column "3" --separator=";" --hide-column=2 \
-"${setup_list[@]}" --ok-label='Select' --cancel-label='Exit')
+"${setup_list[@]}" --ok-label="Next")
 if [ $? = 1 ]; then exit 0; fi
 case $menu_prime in
 	"1") _pset="intel"; _prime="$m_prime_01" ;;
 	"2") _pset="nvidia"; _prime="$m_prime_02" ;;
-	"3") edit_conf ;;
-	"4") edit_xorg ;;
-	"5") edit_options ;;
+	"3") _pset="default"; _prime="$m_prime_03" ;;
+	"4") edit_conf ;;
+	"5") edit_xorg ;;
+	"6") edit_options ;;
 esac
 setup_prime
 if [[ $notif_msg != '' ]]; then
